@@ -5,6 +5,7 @@
 #include <regex>
 #include <fstream>
 #include <set>
+#include <algorithm>
 
 // file with code opens and running trough finding MAIN state before function
 // then function places on first place, then my app goes trough this function
@@ -107,27 +108,47 @@ std::set<std::string> Structurer::getSet() {
     return definedFunctions;
 }
 
+void Structurer::addToResult(const std::string& fnName) {
+    if (std::find(result.begin(), result.end(), fnName) != result.end()) {
+        return;
+    }
+    std::string body = getBody(fnName);
+    result.push_back(fnName);
+    for (auto func : findCalls(body)) {
+        addToResult(func);
+    }
+}
+
+std::vector<std::string> Structurer::getResult() {
+    return result;
+}
+
 int main() {
     Structurer structer;
     structer.setFile("./testCode.cpp");
     structer.readCodeFromFile();
-    structer.setMainBraceAndName();
     structer.setDefinedFunctions();
-    /*auto tempset = structer.getSet();
-    for (const auto& s : tempset) {
-        std::cout << s << '\n';
-    }*/
-    std::string mainName = structer.getMainName();
-    structer.addToGraph(mainName);
-    auto callGraph = structer.getGraph();
-    for (const auto& fnName : callGraph[0].second) {
-        structer.addToGraph(fnName);
+
+    for (auto& fn : structer.getSet()) {
+        structer.addToGraph(fn);
     }
-    for (const auto& [key, value] : structer.getGraph()) {
-        std::cout << key << ":\n";
-        for (const std::string& call : value) {
-            std::cout << "  " << call << '\n';
+
+    std::set<std::string> called;
+    for (auto& [fn, calls] : structer.getGraph()) {
+        for (auto& c : calls) {
+            called.insert(c);
         }
     }
+
+    for (auto& fn : structer.getSet()) {
+        if (!called.count(fn)) {
+            structer.addToResult(fn);
+        }
+    }
+
+    for (auto& fn : structer.getResult()) {
+        std::cout << fn << '\n';
+    }
+
     return 0;
 }

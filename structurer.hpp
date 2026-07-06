@@ -14,6 +14,7 @@ class Structurer {
         size_t mainBracePos;
         std::string mainName;
         std::set<std::string> definedFunctions;
+        std::vector<std::string> result;
     public:
         Structurer(const std::string& _targetFile) : targetFile(_targetFile) {}
         Structurer() = default;
@@ -29,4 +30,6 @@ class Structurer {
         std::string getMainName();
         std::vector<std::pair<std::string, std::vector<std::string>>> getGraph();
         std::set<std::string> getSet();
+        void addToResult(const std::string& fnName);
+        std::vector<std::string> getResult();
 };

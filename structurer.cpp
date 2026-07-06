@@ -3,12 +3,20 @@
 #include <iostream>
 #include <string>
 #include <regex>
-#include <map>
 #include <fstream>
+#include <set>
 
 // file with code opens and running trough finding MAIN state before function
 // then function places on first place, then my app goes trough this function
 // and finding new functions that calls from it.
+
+void Structurer::setDefinedFunctions() {
+    std::regex re(R"(\w+\s+(\w+)\s*\([^)]*\)\s*\{)");
+    auto foundRegex = std::sregex_iterator(fileCode.begin(), fileCode.end(), re);
+    for (; foundRegex != std::sregex_iterator(); foundRegex++) {
+        definedFunctions.insert(std::string((*foundRegex)[1]));
+    }
+}
 
 void Structurer::setFile(const std::string& _targetFile) {
     targetFile = _targetFile;
@@ -35,13 +43,19 @@ std::vector<std::string> Structurer::findCalls(const std::string& functionBody) 
     std::regex regularCalls(R"((\w+)\s*\()");
     auto foundRegex = std::sregex_iterator(functionBody.begin(), functionBody.end(), regularCalls);
     for (; foundRegex != std::sregex_iterator(); foundRegex++) {
-        functionsNames.push_back(std::string((*foundRegex)[1]));
+        std::string name = (*foundRegex)[1];
+        if (definedFunctions.count(name)) {
+            functionsNames.push_back(name);
+        }
     }
     return functionsNames;
 }
 
 std::string Structurer::getBody(const std::string& fnName) {
     size_t functionStart = getBracePosition(fnName);
+    if (functionStart == std::string::npos) {
+        return "";
+    }
     int depth = 0;
     size_t i = functionStart;
     for (; i < fileCode.size(); i++) {
@@ -89,17 +103,27 @@ std::vector<std::pair<std::string, std::vector<std::string>>> Structurer::getGra
     return callGraph;
 }
 
+std::set<std::string> Structurer::getSet() {
+    return definedFunctions;
+}
+
 int main() {
     Structurer structer;
     structer.setFile("./testCode.cpp");
     structer.readCodeFromFile();
+    structer.setMainBraceAndName();
+    structer.setDefinedFunctions();
+    /*auto tempset = structer.getSet();
+    for (const auto& s : tempset) {
+        std::cout << s << '\n';
+    }*/
     std::string mainName = structer.getMainName();
-    std::vector<std::pair<std::string, std::vector<std::string>>> callGraph = structer.getGraph();
     structer.addToGraph(mainName);
+    auto callGraph = structer.getGraph();
     for (const auto& fnName : callGraph[0].second) {
         structer.addToGraph(fnName);
     }
-    for (const auto& [key, value] : callGraph) {
+    for (const auto& [key, value] : structer.getGraph()) {
         std::cout << key << ":\n";
         for (const std::string& call : value) {
             std::cout << "  " << call << '\n';

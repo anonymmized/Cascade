@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 #include <fstream>
+#include <set>
 
 class Structurer {
     private:
@@ -12,9 +13,11 @@ class Structurer {
         std::string fileCode;
         size_t mainBracePos;
         std::string mainName;
+        std::set<std::string> definedFunctions;
     public:
         Structurer(const std::string& _targetFile) : targetFile(_targetFile) {}
         Structurer() = default;
+        void setDefinedFunctions();
         void setFile(const std::string& _targetFile);
         std::ifstream openFile();
         void readCodeFromFile();
@@ -25,4 +28,5 @@ class Structurer {
         void setMainBraceAndName();
         std::string getMainName();
         std::vector<std::pair<std::string, std::vector<std::string>>> getGraph();
+        std::set<std::string> getSet();
 };

@@ -1,4 +1,4 @@
-#include "structurer.hpp"
+#include "./structurer.hpp"
 
 #include <iostream>
 #include <string>
@@ -9,8 +9,6 @@
 // file with code opens and running trough finding MAIN state before function
 // then function places on first place, then my app goes trough this function
 // and finding new functions that calls from it.
-
-std::map<std::string, std::vector<std::string>> callGraph;
 
 void Structurer::setFile(const std::string& _targetFile) {
     targetFile = _targetFile;
@@ -25,7 +23,7 @@ std::ifstream Structurer::openFile() {
 }
 
 void Structurer::readCodeFromFile() {
-    std::ifstream openedFile = openFile(targetFile);
+    std::ifstream openedFile = openFile();
     std::string line;
     while (std::getline(openedFile, line)) {
         fileCode += line + '\n';
@@ -70,11 +68,10 @@ size_t Structurer::getBracePosition(const std::string& fnName) {
 void Structurer::addToGraph(const std::string& fnName) {
     std::string body = getBody(fnName);
     std::vector<std::string> calls = findCalls(body);
-    callGraph.push_back(fnName);
-    callGraph[fnName] = calls;
+    callGraph.push_back({fnName, calls});
 }
 
-void setMainBraceAndName() {
+void Structurer::setMainBraceAndName() {
     std::regex re(R"(//\s*MAIN\s*[\r\n]+[^\n(]*?(\w+)\s*\()");
     std::smatch match;
     if (std::regex_search(fileCode, match, re)) {
@@ -84,22 +81,22 @@ void setMainBraceAndName() {
     mainBracePos = fileCode.find('{', functionStart);
 }
 
+std::string Structurer::getMainName() {
+    return mainName;
+}
+
+std::vector<std::pair<std::string, std::vector<std::string>>> Structurer::getGraph() {
+    return callGraph;
+}
+
 int main() {
     Structurer structer;
     structer.setFile("./testCode.cpp");
     structer.readCodeFromFile();
-
-    int depth = 0;
-    size_t i = whereBraceOpens;
-    for (; i < fullCode.size(); i++) {
-        if (fullCode[i] == '{') {
-            depth += 1;
-        } else if (fullCode[i] == '}' && --depth == 0) {
-            break;
-        }
-    }
+    std::string mainName = structer.getMainName();
+    std::vector<std::pair<std::string, std::vector<std::string>>> callGraph = structer.getGraph();
     structer.addToGraph(mainName);
-    for (const auto& fnName : mainCalls[0]) {
+    for (const auto& fnName : callGraph[0].second) {
         structer.addToGraph(fnName);
     }
     for (const auto& [key, value] : callGraph) {

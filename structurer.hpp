@@ -11,25 +11,25 @@ class Structurer {
         std::vector<std::pair<std::string, std::vector<std::string>>> callGraph;
         std::string targetFile;
         std::string fileCode;
-        size_t mainBracePos;
-        std::string mainName;
         std::set<std::string> definedFunctions;
-        std::vector<std::string> result;
+        std::vector<std::string> finalOrder;
+
+        void setDefinedFunctions();
+        std::ifstream openFile();
+        void readCodeFromFile();
+        std::vector<std::string> findCalls(cosnt std::string& functionBody);
+        std::string getBody(const std::string& fnName);
+        size_t getBracePosition(const std::string& fnName);
+        std::vector<std::pair<std::string, std::vector<std::string>>> getGraph();
+        std::set<std::string> getDefinedFunctions();
+        void addToGraph(const std::stirng& fnName);
+        void addToResult(const std::string& fnName);
+
     public:
         Structurer(const std::string& _targetFile) : targetFile(_targetFile) {}
         Structurer() = default;
-        void setDefinedFunctions();
+
         void setFile(const std::string& _targetFile);
-        std::ifstream openFile();
-        void readCodeFromFile();
-        std::vector<std::string> findCalls(const std::string& functionBody);
-        std::string getBody(const std::string& fnName);
-        size_t getBracePosition(const std::string& fnName);
-        void addToGraph(const std::string& fnName);
-        void setMainBraceAndName();
-        std::string getMainName();
-        std::vector<std::pair<std::string, std::vector<std::string>>> getGraph();
-        std::set<std::string> getSet();
-        void addToResult(const std::string& fnName);
-        std::vector<std::string> getResult();
+        void analyze();
+        std::vector<std::string> getOrder();
 };

@@ -86,25 +86,11 @@ void Structurer::addToGraph(const std::string& fnName) {
     callGraph.push_back({fnName, calls});
 }
 
-void Structurer::setMainBraceAndName() {
-    std::regex re(R"(//\s*MAIN\s*[\r\n]+[^\n(]*?(\w+)\s*\()");
-    std::smatch match;
-    if (std::regex_search(fileCode, match, re)) {
-        mainName = match[1];
-    }
-    size_t functionStart = match.position(1) + match.length(0);
-    mainBracePos = fileCode.find('{', functionStart);
-}
-
-std::string Structurer::getMainName() {
-    return mainName;
-}
-
 std::vector<std::pair<std::string, std::vector<std::string>>> Structurer::getGraph() {
     return callGraph;
 }
 
-std::set<std::string> Structurer::getSet() {
+std::set<std::string> Structurer::getDefinedFunctions() {
     return definedFunctions;
 }
 
@@ -123,9 +109,20 @@ std::vector<std::string> Structurer::getResult() {
     return result;
 }
 
+void Structurer::analyze() {
+    readCodeFromFile();
+    setDefinedFunctions();
+
+    for (auto& fn : definedFunctions) {
+        addToGraph(fn);
+    }
+
+}
+
+
 int main() {
     Structurer structer;
-    structer.setFile("./testCode.cpp");
+    structer.setFile("./structurer.cpp");
     structer.readCodeFromFile();
     structer.setDefinedFunctions();
 

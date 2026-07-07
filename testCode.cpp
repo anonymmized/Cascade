@@ -1,8 +1,13 @@
 #include <iostream>
 #include <string>
 
-int add(int a, int b) {
+int doSum(int a, int b) {
     return a + b;
+}
+
+int add(int a, int b) {
+    int sum = doSum(a, b);
+    return sum;
 }
 
 int multiply(int a, int b) {

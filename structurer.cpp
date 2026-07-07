@@ -165,7 +165,7 @@ int main() {
     Structurer structer;
     structer.setFile("./structurer.cpp");
     structer.analyze();
-    std::vector<std::string> finalOrder = structer.getOrder();
+    const auto& finalOrder = structer.getOrder();
     for (auto& fn : finalOrder) {
         std::cout << "Name: " << fn << '\n';
     }

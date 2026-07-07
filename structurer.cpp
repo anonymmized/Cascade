@@ -13,7 +13,7 @@ void Structurer::setFile(const std::string& _targetFile) {
 
 void Structurer::analyze() {
     readCodeFromFile();
-    setDefinedFunctions();
+    collectDefinedFunctions();
 
     for (auto& fn : definedFunctions) {
         addToGraph(fn);
@@ -49,7 +49,7 @@ std::ifstream Structurer::openFile() {
     return openedFile;
 }
 
-void Structurer::setDefinedFunctions() {
+void Structurer::collectDefinedFunctions() {
     std::regex re(R"(^[A-Za-z_][^\n(]*?(\w+)\s*\([^)]*\)\s*\{)", std::regex::multiline);
     static const std::set<std::string> keywords =
         {"if", "else", "for", "while", "switch", "catch", "do", "return", "sizeof"};
@@ -155,7 +155,7 @@ void Structurer::addToOrder(const std::string& fnName) {
     }
 }
 
-std::vector<std::string> Structurer::getOrder() {
+const std::vector<std::string>& Structurer::getOrder() const {
     return finalOrder;
 }
 

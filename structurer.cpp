@@ -12,10 +12,16 @@
 // and finding new functions that calls from it.
 
 void Structurer::setDefinedFunctions() {
-    std::regex re(R"(\w+\s+(\w+)\s*\([^)]*\)\s*\{)");
+    std::regex re(R"(^[A-Za-z_][^\n(]*?(\w+)\s*\([^)]*\)\s*\{)", std::regex::multiline);
+    static const std::set<std::string> keywords =
+        {"if", "else", "for", "while", "switch", "catch", "do", "return", "sizeof"};
     auto foundRegex = std::sregex_iterator(fileCode.begin(), fileCode.end(), re);
     for (; foundRegex != std::sregex_iterator(); foundRegex++) {
-        definedFunctions.insert(std::string((*foundRegex)[1]));
+        std::string name = (*foundRegex)[1];
+        if (keywords.count(name)) {
+            continue;
+        }
+        definedFunctions.insert(name);
     }
 }
 
@@ -60,9 +66,43 @@ std::string Structurer::getBody(const std::string& fnName) {
     int depth = 0;
     size_t i = functionStart;
     for (; i < fileCode.size(); i++) {
-        if (fileCode[i] == '{') {
+        char curr = fileCode[i];
+        if (curr == '"') {
+            i += 1;
+            while (i < fileCode.size() && fileCode[i] != '"') {
+                if (fileCode[i] == '\\') {
+                     i += 1;
+                }
+                i += 1;
+            }
+            continue;
+        }
+        if (curr == '\'') {
+            i += 1;
+            while (i < fileCode.size() && fileCode[i] != '\'') {
+                if (fileCode[i] == '\\') {
+                    i += 1;
+                }
+                i += 1;
+            }
+            continue;
+        }
+        if (curr == '/' && i + 1 < fileCode.size() && fileCode[i+1] == '/') {
+            while (i < fileCode.size() && fileCode[i] != '\n') {
+                i += 1;
+            }
+            continue;
+        }
+        if (curr == '/' && i + 1 < fileCode.size() && fileCode[i+1] == '*') {
+            i += 2;
+            while (i + 1 < fileCode.size() && !(fileCode[i] == '*' && fileCode[i+1] == '/')) {
+                i += 1;
+            }
+            continue;
+        }
+        if (curr == '{') {
             depth += 1;
-        } else if (fileCode[i] == '}' && --depth == 0) {
+        } else if (curr == '}' && --depth == 0) {
             break;
         }
     }
@@ -86,27 +126,19 @@ void Structurer::addToGraph(const std::string& fnName) {
     callGraph.push_back({fnName, calls});
 }
 
-std::vector<std::pair<std::string, std::vector<std::string>>> Structurer::getGraph() {
-    return callGraph;
-}
-
-std::set<std::string> Structurer::getDefinedFunctions() {
-    return definedFunctions;
-}
-
-void Structurer::addToResult(const std::string& fnName) {
-    if (std::find(result.begin(), result.end(), fnName) != result.end()) {
+void Structurer::addToOrder(const std::string& fnName) {
+    if (std::find(finalOrder.begin(), finalOrder.end(), fnName) != finalOrder.end()) {
         return;
     }
     std::string body = getBody(fnName);
-    result.push_back(fnName);
+    finalOrder.push_back(fnName);
     for (auto func : findCalls(body)) {
-        addToResult(func);
+        addToOrder(func);
     }
 }
 
-std::vector<std::string> Structurer::getResult() {
-    return result;
+std::vector<std::string> Structurer::getOrder() {
+    return finalOrder;
 }
 
 void Structurer::analyze() {
@@ -117,35 +149,28 @@ void Structurer::analyze() {
         addToGraph(fn);
     }
 
+    std::set<std::string> calledFunctions;
+    for (auto& [fn, calls] : callGraph) {
+        for (auto& c : calls) {
+            calledFunctions.insert(c);
+        }
+    }
+
+    for (auto& fn : definedFunctions) {
+        if (!calledFunctions.count(fn)) {
+            addToOrder(fn);
+        }
+    }
 }
 
 
 int main() {
     Structurer structer;
     structer.setFile("./structurer.cpp");
-    structer.readCodeFromFile();
-    structer.setDefinedFunctions();
-
-    for (auto& fn : structer.getSet()) {
-        structer.addToGraph(fn);
+    structer.analyze();
+    std::vector<std::string> finalOrder = structer.getOrder();
+    for (auto& fn : finalOrder) {
+        std::cout << "Name: " << fn << '\n';
     }
-
-    std::set<std::string> called;
-    for (auto& [fn, calls] : structer.getGraph()) {
-        for (auto& c : calls) {
-            called.insert(c);
-        }
-    }
-
-    for (auto& fn : structer.getSet()) {
-        if (!called.count(fn)) {
-            structer.addToResult(fn);
-        }
-    }
-
-    for (auto& fn : structer.getResult()) {
-        std::cout << fn << '\n';
-    }
-
     return 0;
 }

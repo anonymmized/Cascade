@@ -7,9 +7,47 @@
 #include <set>
 #include <algorithm>
 
-// file with code opens and running trough finding MAIN state before function
-// then function places on first place, then my app goes trough this function
-// and finding new functions that calls from it.
+void Structurer::setFile(const std::string& _targetFile) {
+    targetFile = _targetFile;
+}
+
+void Structurer::analyze() {
+    readCodeFromFile();
+    setDefinedFunctions();
+
+    for (auto& fn : definedFunctions) {
+        addToGraph(fn);
+    }
+
+    std::set<std::string> calledFunctions;
+    for (auto& [fn, calls] : callGraph) {
+        for (auto& c : calls) {
+            calledFunctions.insert(c);
+        }
+    }
+
+    for (auto& fn : definedFunctions) {
+        if (!calledFunctions.count(fn)) {
+            addToOrder(fn);
+        }
+    }
+}
+
+void Structurer::readCodeFromFile() {
+    std::ifstream openedFile = openFile();
+    std::string line;
+    while (std::getline(openedFile, line)) {
+        fileCode += line + '\n';
+    }
+}
+
+std::ifstream Structurer::openFile() {
+    std::ifstream openedFile(targetFile);
+    if (!openedFile.is_open()) {
+        std::cerr << "File: " << targetFile << " wasn't opened\n";
+    }
+    return openedFile;
+}
 
 void Structurer::setDefinedFunctions() {
     std::regex re(R"(^[A-Za-z_][^\n(]*?(\w+)\s*\([^)]*\)\s*\{)", std::regex::multiline);
@@ -25,37 +63,10 @@ void Structurer::setDefinedFunctions() {
     }
 }
 
-void Structurer::setFile(const std::string& _targetFile) {
-    targetFile = _targetFile;
-}
-
-std::ifstream Structurer::openFile() {
-    std::ifstream openedFile(targetFile);
-    if (!openedFile.is_open()) {
-        std::cerr << "File " << targetFile << "wasn't opened\n";
-    }
-    return openedFile;
-}
-
-void Structurer::readCodeFromFile() {
-    std::ifstream openedFile = openFile();
-    std::string line;
-    while (std::getline(openedFile, line)) {
-        fileCode += line + '\n';
-    }
-}
-
-std::vector<std::string> Structurer::findCalls(const std::string& functionBody) {
-    std::vector<std::string> functionsNames;
-    std::regex regularCalls(R"((\w+)\s*\()");
-    auto foundRegex = std::sregex_iterator(functionBody.begin(), functionBody.end(), regularCalls);
-    for (; foundRegex != std::sregex_iterator(); foundRegex++) {
-        std::string name = (*foundRegex)[1];
-        if (definedFunctions.count(name)) {
-            functionsNames.push_back(name);
-        }
-    }
-    return functionsNames;
+void Structurer::addToGraph(const std::string& fnName) {
+    std::string body = getBody(fnName);
+    std::vector<std::string> calls = findCalls(body);
+    callGraph.push_back({fnName, calls});
 }
 
 std::string Structurer::getBody(const std::string& fnName) {
@@ -63,6 +74,7 @@ std::string Structurer::getBody(const std::string& fnName) {
     if (functionStart == std::string::npos) {
         return "";
     }
+
     int depth = 0;
     size_t i = functionStart;
     for (; i < fileCode.size(); i++) {
@@ -71,7 +83,7 @@ std::string Structurer::getBody(const std::string& fnName) {
             i += 1;
             while (i < fileCode.size() && fileCode[i] != '"') {
                 if (fileCode[i] == '\\') {
-                     i += 1;
+                    i += 1;
                 }
                 i += 1;
             }
@@ -81,7 +93,7 @@ std::string Structurer::getBody(const std::string& fnName) {
             i += 1;
             while (i < fileCode.size() && fileCode[i] != '\'') {
                 if (fileCode[i] == '\\') {
-                    i += 1;
+                     i += 1;
                 }
                 i += 1;
             }
@@ -106,7 +118,6 @@ std::string Structurer::getBody(const std::string& fnName) {
             break;
         }
     }
-
     std::string functionBody = fileCode.substr(functionStart, i - functionStart + 1);
     return functionBody;
 }
@@ -120,10 +131,17 @@ size_t Structurer::getBracePosition(const std::string& fnName) {
     return match.position(0) + match.length(0) - 1;
 }
 
-void Structurer::addToGraph(const std::string& fnName) {
-    std::string body = getBody(fnName);
-    std::vector<std::string> calls = findCalls(body);
-    callGraph.push_back({fnName, calls});
+std::vector<std::string> Structurer::findCalls(const std::string& functionBody) {
+    std::vector<std::string> functionsNames;
+    std::regex re(R"((\w+)\s*\()");
+    auto foundRegex = std::sregex_iterator(functionBody.begin(), functionBody.end(), re);
+    for (; foundRegex != std::sregex_iterator(); foundRegex++) {
+        std::string name = (*foundRegex)[1];
+        if (definedFunctions.count(name)) {
+            functionsNames.push_back(name);
+        }
+    }
+    return functionsNames;
 }
 
 void Structurer::addToOrder(const std::string& fnName) {
@@ -141,27 +159,6 @@ std::vector<std::string> Structurer::getOrder() {
     return finalOrder;
 }
 
-void Structurer::analyze() {
-    readCodeFromFile();
-    setDefinedFunctions();
-
-    for (auto& fn : definedFunctions) {
-        addToGraph(fn);
-    }
-
-    std::set<std::string> calledFunctions;
-    for (auto& [fn, calls] : callGraph) {
-        for (auto& c : calls) {
-            calledFunctions.insert(c);
-        }
-    }
-
-    for (auto& fn : definedFunctions) {
-        if (!calledFunctions.count(fn)) {
-            addToOrder(fn);
-        }
-    }
-}
 
 
 int main() {

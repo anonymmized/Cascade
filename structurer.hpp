@@ -14,7 +14,7 @@ class Structurer {
         std::set<std::string> definedFunctions;
         std::vector<std::string> finalOrder;
 
-        void setDefinedFunctions();
+        void collectDefinedFunctions();
         std::ifstream openFile();
         void readCodeFromFile();
         std::vector<std::string> findCalls(const std::string& functionBody);
@@ -29,5 +29,5 @@ class Structurer {
 
         void setFile(const std::string& _targetFile);
         void analyze();
-        std::vector<std::string> getOrder();
+        const std::vector<std::string>& getOrder() const;
 };

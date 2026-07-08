@@ -30,4 +30,5 @@ class Structurer {
         void setFile(const std::string& _targetFile);
         void analyze();
         const std::vector<std::string>& getOrder() const;
+        std::string getFullDefinition(const std::string& fnName);
 };

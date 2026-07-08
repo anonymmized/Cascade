@@ -1,4 +1,5 @@
 #include "editor.hpp"
+#include "structurer.hpp"
 
 #include <iostream>
 #include <string>
@@ -84,10 +85,27 @@ void Editor::addFunctionToFile(const std::string& functionBody) {
     fileToWrite << functionBody << '\n';
 }
 
+void Editor::addAllFunctions() {
+    Structurer structurer;
+    structurer.setFile(oldFileName);
+    structurer.analyze();
+    rightOrder = structurer.getOrder();
+    for (auto& fn : rightOrder) {
+        if (fn != "main") {
+            std::string fnDefinition = structurer.getFullDefinition(fn);
+            addFunctionToFile(fnDefinition);
+        }
+    }
+    std::string mainDefinition = structurer.getFullDefinition("main");
+    addFunctionToFile(mainDefinition);
+}
+
 int main() {
     Editor editor;
     editor.setOldFileName("./structurer.cpp");
     editor.createNewFileName();
-    editor.writeToFile("hello");
-    editor.writeToFile("world");
+    editor.setFileCode();
+    std::string fileHead = editor.getFileHead();
+    editor.writeToFile(fileHead);
+    editor.addAllFunctions();
 }

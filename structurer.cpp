@@ -159,15 +159,59 @@ const std::vector<std::string>& Structurer::getOrder() const {
     return finalOrder;
 }
 
-
-
-int main() {
-    Structurer structer;
-    structer.setFile("./structurer.cpp");
-    structer.analyze();
-    const auto& finalOrder = structer.getOrder();
-    for (auto& fn : finalOrder) {
-        std::cout << "Name: " << fn << '\n';
+std::string Structurer::getFullDefinition(const std::string& fnName) {
+    std::regex re(R"(^[A-Za-z_][^\n(]*?\b)" + fnName + R"(\s*\([^)]*\)\s*\{)", std::regex::multiline);
+    std::smatch match;
+    if (!std::regex_search(fileCode, match, re)) {
+        return "";
     }
-    return 0;
+    size_t defStart = match.position(0);
+    size_t braceStart = match.position(0) + match.length(0) - 1;
+
+    int depth = 0;
+    size_t i = braceStart;
+    for (; i < fileCode.size(); i++) {
+        char curr = fileCode[i];
+        if (curr == '"') {
+            i += 1;
+            while (i < fileCode.size() && fileCode[i] != '"') {
+                if (fileCode[i] == '\\') {
+                    i += 1;
+                }
+                i += 1;
+            }
+            continue;
+        }
+        if (curr == '\'') {
+            i += 1;
+            while (i < fileCode.size() && fileCode[i] != '\'') {
+                if (fileCode[i] == '\\') {
+                     i += 1;
+                }
+                i += 1;
+            }
+            continue;
+        }
+        if (curr == '/' && i + 1 < fileCode.size() && fileCode[i+1] == '/') {
+            while (i < fileCode.size() && fileCode[i] != '\n') {
+                i += 1;
+            }
+            continue;
+        }
+        if (curr == '/' && i + 1 < fileCode.size() && fileCode[i+1] == '*') {
+            i += 2;
+            while (i + 1 < fileCode.size() && !(fileCode[i] == '*' && fileCode[i+1] == '/')) {
+                i += 1;
+            }
+            continue;
+        }
+        if (curr == '{') {
+            depth += 1;
+        } else if (curr == '}' && --depth == 0) {
+            break;
+        }
+    }
+    std::string finalString = fileCode.substr(defStart, i - defStart + 1);
+    return finalString;
 }
+

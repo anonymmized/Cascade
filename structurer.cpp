@@ -31,6 +31,10 @@ void Structurer::analyze() {
             addToOrder(fn);
         }
     }
+
+    for (auto& fn : definedFunctions) {
+        addToOrder(fn);
+    }
 }
 
 void Structurer::readCodeFromFile() {
@@ -69,14 +73,9 @@ void Structurer::addToGraph(const std::string& fnName) {
     callGraph.push_back({fnName, calls});
 }
 
-std::string Structurer::getBody(const std::string& fnName) {
-    size_t functionStart = getBracePosition(fnName);
-    if (functionStart == std::string::npos) {
-        return "";
-    }
-
-    int depth = 0;
+size_t Structurer::getFunctionEnd(size_t functionStart) {
     size_t i = functionStart;
+    int depth = 0;
     for (; i < fileCode.size(); i++) {
         char curr = fileCode[i];
         if (curr == '"') {
@@ -118,17 +117,18 @@ std::string Structurer::getBody(const std::string& fnName) {
             break;
         }
     }
-    std::string functionBody = fileCode.substr(functionStart, i - functionStart + 1);
-    return functionBody;
+    return i;
 }
 
-size_t Structurer::getBracePosition(const std::string& fnName) {
-    std::regex re(R"(\b)" + fnName + R"(\s*\([^)]*\)\s*\{)");
-    std::smatch match;
-    if (!std::regex_search(fileCode, match, re)) {
-        return std::string::npos;
+std::string Structurer::getBody(const std::string& fnName) {
+    size_t functionStart = findPositions(fnName).second;
+    if (functionStart == std::string::npos) {
+        return "";
     }
-    return match.position(0) + match.length(0) - 1;
+
+    size_t i = getFunctionEnd(functionStart);
+    std::string functionBody = fileCode.substr(functionStart, i - functionStart + 1);
+    return functionBody;
 }
 
 std::vector<std::string> Structurer::findCalls(const std::string& functionBody) {
@@ -159,15 +159,28 @@ const std::vector<std::string>& Structurer::getOrder() const {
     return finalOrder;
 }
 
-
-
-int main() {
-    Structurer structer;
-    structer.setFile("./structurer.cpp");
-    structer.analyze();
-    const auto& finalOrder = structer.getOrder();
-    for (auto& fn : finalOrder) {
-        std::cout << "Name: " << fn << '\n';
+std::pair<size_t, size_t> Structurer::findPositions(const std::string& fnName) {
+    std::regex re(R"((?:^[ \t]*(?://[^\n]*|/\*[\s\S]*?\*/)[ \t]*\n)*^[A-Za-z_][^\n(]*?\b)" + fnName + R"(\s*\([^)]*\)\s*\{)", std::regex::multiline);
+    std::smatch match;
+    if (!std::regex_search(fileCode, match, re)) {
+        return {std::string::npos, std::string::npos};
     }
-    return 0;
+    size_t defStart = match.position(0);
+    size_t braceStart = match.position(0) + match.length(0) - 1;
+    return {defStart, braceStart};
+}
+
+std::string Structurer::getFullDefinition(const std::string& fnName) {
+    auto [defStart, braceStart] = findPositions(fnName);
+    if (defStart == std::string::npos) {
+        return "";
+    }
+    size_t i = getFunctionEnd(braceStart);
+    std::string finalString = fileCode.substr(defStart, i - defStart + 1);
+    return finalString;
+}
+
+
+size_t Structurer::getDefinedCount() {
+    return definedFunctions.size();
 }

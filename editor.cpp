@@ -7,9 +7,6 @@
 #include <fstream>
 #include <regex>
 
-/* hello world
- */
-
 void Editor::setFileCode() {
     std::ifstream fileWithCode(oldFileName);
     if (!fileWithCode.is_open()) {
@@ -60,7 +57,7 @@ bool Editor::isFunctionLine(const std::string& line) {
 }
 
 void Editor::writeToFile(const std::string& strToWrite) {
-    std::ofstream newFile(newFileName, std::ios::app);
+    std::ofstream newFile(newFileName);
     if (!newFile.is_open()) {
         std::cerr << "The file " << newFileName << " was not opened\n";
         return;

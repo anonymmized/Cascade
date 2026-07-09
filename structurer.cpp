@@ -117,24 +117,14 @@ size_t Structurer::getFunctionEnd(size_t functionStart) {
 }
 
 std::string Structurer::getBody(const std::string& fnName) {
-    size_t functionStart = getBracePosition(fnName);
+    size_t functionStart = findPositions(fnName).second;
     if (functionStart == std::string::npos) {
         return "";
     }
 
-    int depth = 0;
     size_t i = getFunctionEnd(functionStart);
     std::string functionBody = fileCode.substr(functionStart, i - functionStart + 1);
     return functionBody;
-}
-
-size_t Structurer::getBracePosition(const std::string& fnName) {
-    std::regex re(R"(\b)" + fnName + R"(\s*\([^)]*\)\s*\{)");
-    std::smatch match;
-    if (!std::regex_search(fileCode, match, re)) {
-        return std::string::npos;
-    }
-    return match.position(0) + match.length(0) - 1;
 }
 
 std::vector<std::string> Structurer::findCalls(const std::string& functionBody) {
@@ -165,16 +155,22 @@ const std::vector<std::string>& Structurer::getOrder() const {
     return finalOrder;
 }
 
-std::string Structurer::getFullDefinition(const std::string& fnName) {
+std::pair<size_t, size_t> Structurer::findPositions(const std::string& fnName) {
     std::regex re(R"(^[A-Za-z_][^\n(]*?\b)" + fnName + R"(\s*\([^)]*\)\s*\{)", std::regex::multiline);
     std::smatch match;
     if (!std::regex_search(fileCode, match, re)) {
-        return "";
+        return {std::string::npos, std::string::npos};
     }
     size_t defStart = match.position(0);
     size_t braceStart = match.position(0) + match.length(0) - 1;
+    return {defStart, braceStart};
+}
 
-    int depth = 0;
+std::string Structurer::getFullDefinition(const std::string& fnName) {
+    auto [defStart, braceStart] = findPositions(fnName);
+    if (defStart == std::string::npos) {
+        return "";
+    }
     size_t i = getFunctionEnd(braceStart);
     std::string finalString = fileCode.substr(defStart, i - defStart + 1);
     return finalString;

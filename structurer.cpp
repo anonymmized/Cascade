@@ -69,14 +69,9 @@ void Structurer::addToGraph(const std::string& fnName) {
     callGraph.push_back({fnName, calls});
 }
 
-std::string Structurer::getBody(const std::string& fnName) {
-    size_t functionStart = getBracePosition(fnName);
-    if (functionStart == std::string::npos) {
-        return "";
-    }
-
-    int depth = 0;
+size_t Structurer::getFunctionEnd(size_t functionStart) {
     size_t i = functionStart;
+    int depth = 0;
     for (; i < fileCode.size(); i++) {
         char curr = fileCode[i];
         if (curr == '"') {
@@ -118,6 +113,17 @@ std::string Structurer::getBody(const std::string& fnName) {
             break;
         }
     }
+    return i;
+}
+
+std::string Structurer::getBody(const std::string& fnName) {
+    size_t functionStart = getBracePosition(fnName);
+    if (functionStart == std::string::npos) {
+        return "";
+    }
+
+    int depth = 0;
+    size_t i = getFunctionEnd(functionStart);
     std::string functionBody = fileCode.substr(functionStart, i - functionStart + 1);
     return functionBody;
 }
@@ -169,48 +175,7 @@ std::string Structurer::getFullDefinition(const std::string& fnName) {
     size_t braceStart = match.position(0) + match.length(0) - 1;
 
     int depth = 0;
-    size_t i = braceStart;
-    for (; i < fileCode.size(); i++) {
-        char curr = fileCode[i];
-        if (curr == '"') {
-            i += 1;
-            while (i < fileCode.size() && fileCode[i] != '"') {
-                if (fileCode[i] == '\\') {
-                    i += 1;
-                }
-                i += 1;
-            }
-            continue;
-        }
-        if (curr == '\'') {
-            i += 1;
-            while (i < fileCode.size() && fileCode[i] != '\'') {
-                if (fileCode[i] == '\\') {
-                     i += 1;
-                }
-                i += 1;
-            }
-            continue;
-        }
-        if (curr == '/' && i + 1 < fileCode.size() && fileCode[i+1] == '/') {
-            while (i < fileCode.size() && fileCode[i] != '\n') {
-                i += 1;
-            }
-            continue;
-        }
-        if (curr == '/' && i + 1 < fileCode.size() && fileCode[i+1] == '*') {
-            i += 2;
-            while (i + 1 < fileCode.size() && !(fileCode[i] == '*' && fileCode[i+1] == '/')) {
-                i += 1;
-            }
-            continue;
-        }
-        if (curr == '{') {
-            depth += 1;
-        } else if (curr == '}' && --depth == 0) {
-            break;
-        }
-    }
+    size_t i = getFunctionEnd(braceStart);
     std::string finalString = fileCode.substr(defStart, i - defStart + 1);
     return finalString;
 }

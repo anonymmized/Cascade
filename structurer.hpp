@@ -22,7 +22,7 @@ class Structurer {
         size_t getBracePosition(const std::string& fnName);
         void addToGraph(const std::string& fnName);
         void addToOrder(const std::string& fnName);
-
+        size_t getFunctionEnd(size_t functionStart);
     public:
         Structurer(const std::string& _targetFile) : targetFile(_targetFile) {}
         Structurer() = default;

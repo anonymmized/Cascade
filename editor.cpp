@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include <regex>
+#include <filesystem>
 
 void Editor::setFileCode() {
     std::ifstream fileWithCode(oldFileName);
@@ -39,21 +40,13 @@ void Editor::createNewFileName() {
 }
 
 std::string Editor::getFileHead() {
-    std::istringstream stream(fileCode);
-    std::string finalHead;
-    std::string line;
-    while (std::getline(stream, line)) {
-        if (isFunctionLine(line)) {
-            break;
-        }
-        finalHead += line + '\n';
+    std::regex re(R"((?:^[ \t]*(?://[^\n]*|/\*[\s\S]*?\*/)[ \t]*\n)*^[A-Za-z_][^\n(]*?\w+\s*\([^)]*\)\s*\{)", std::regex::multiline);
+    std::smatch match;
+    if (!std::regex_search(fileCode, match, re)) {
+        return fileCode;
     }
-    return finalHead;
-}
-
-bool Editor::isFunctionLine(const std::string& line) {
-    static const std::regex re(R"(^[A-Za-z_][^\n(]*?(\w+)\s*\([^)]*\)\s*\{?\s*$)");
-    return std::regex_search(line, re);
+    size_t firstFunction = match.position(0);
+    return fileCode.substr(0, firstFunction);
 }
 
 void Editor::writeToFile(const std::string& strToWrite) {
@@ -105,6 +98,16 @@ void Editor::edit() {
     setFileCode();
     writeHeadToFile();
     addAllFunctions();
+    renameFile();
+}
+
+void Editor::renameFile() {
+    std::error_code ec;
+    std::filesystem::rename(newFileName, oldFileName, ec);
+    if (ec) {
+        std::cerr << "Rename failed: " << ec.message() << '\n';
+        return;
+    }
 }
 
 int main() {

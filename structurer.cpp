@@ -156,7 +156,7 @@ const std::vector<std::string>& Structurer::getOrder() const {
 }
 
 std::pair<size_t, size_t> Structurer::findPositions(const std::string& fnName) {
-    std::regex re(R"(^[A-Za-z_][^\n(]*?\b)" + fnName + R"(\s*\([^)]*\)\s*\{)", std::regex::multiline);
+    std::regex re(R"((?:^[ \t]*(?://[^\n]*|/\*[\s\S]*?\*/)[ \t]*\n)*^[A-Za-z_][^\n(]*?\b)" + fnName + R"(\s*\([^)]*\)\s*\{)", std::regex::multiline);
     std::smatch match;
     if (!std::regex_search(fileCode, match, re)) {
         return {std::string::npos, std::string::npos};

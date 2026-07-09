@@ -10,7 +10,6 @@ class Editor {
         std::string newFileName;
         std::vector<std::string> rightOrder;
 
-        bool isFunctionLine(const std::string& line);
         void createNewFileName();
         void writeToFile(const std::string& strToWrite);
         void addFunctionToFile(const std::string& functionBody);
@@ -18,6 +17,7 @@ class Editor {
         void addAllFunctions();
         void setFileCode();
         void writeHeadToFile();
+        void renameFile();
     public:
         Editor(const std::string& fileName) : oldFileName(fileName) {}
         Editor() = default;

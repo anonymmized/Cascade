@@ -7,14 +7,8 @@
 #include <fstream>
 #include <regex>
 
-/*
-std::string getFileHead(const std::string& fileName) {
-    std::ifstream fileWithCode(fileName);
-    if (!fileWithCode.is_open()) {
-
-    }
-}
-*/
+/* hello world
+ */
 
 void Editor::setFileCode() {
     std::ifstream fileWithCode(oldFileName);
@@ -66,7 +60,7 @@ bool Editor::isFunctionLine(const std::string& line) {
 }
 
 void Editor::writeToFile(const std::string& strToWrite) {
-    std::ofstream newFile(newFileName);
+    std::ofstream newFile(newFileName, std::ios::app);
     if (!newFile.is_open()) {
         std::cerr << "The file " << newFileName << " was not opened\n";
         return;
@@ -82,7 +76,7 @@ void Editor::addFunctionToFile(const std::string& functionBody) {
         return;
     }
 
-    fileToWrite << functionBody << '\n';
+    fileToWrite << functionBody<< '\n';
 }
 
 void Editor::addAllFunctions() {
@@ -100,12 +94,24 @@ void Editor::addAllFunctions() {
     addFunctionToFile(mainDefinition);
 }
 
+void Editor::writeHeadToFile() {
+    std::string fileHead = getFileHead();
+    writeToFile(fileHead);
+}
+
+void Editor::edit() {
+    if (oldFileName.empty()) {
+        std::cerr << "The filename was not set\n";
+        return;
+    }
+    createNewFileName();
+    setFileCode();
+    writeHeadToFile();
+    addAllFunctions();
+}
+
 int main() {
     Editor editor;
-    editor.setOldFileName("./structurer.cpp");
-    editor.createNewFileName();
-    editor.setFileCode();
-    std::string fileHead = editor.getFileHead();
-    editor.writeToFile(fileHead);
-    editor.addAllFunctions();
+    editor.setOldFileName("./editor.cpp");
+    editor.edit();
 }

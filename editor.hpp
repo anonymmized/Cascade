@@ -9,6 +9,7 @@ class Editor {
         std::string oldFileName;
         std::string newFileName;
         std::vector<std::string> rightOrder;
+        size_t definedCount;
 
         void createNewFileName();
         void writeToFile(const std::string& strToWrite);

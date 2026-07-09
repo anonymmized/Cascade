@@ -31,6 +31,10 @@ void Structurer::analyze() {
             addToOrder(fn);
         }
     }
+
+    for (auto& fn : definedFunctions) {
+        addToOrder(fn);
+    }
 }
 
 void Structurer::readCodeFromFile() {
@@ -176,3 +180,7 @@ std::string Structurer::getFullDefinition(const std::string& fnName) {
     return finalString;
 }
 
+
+size_t Structurer::getDefinedCount() {
+    return definedFunctions.size();
+}

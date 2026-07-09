@@ -31,4 +31,5 @@ class Structurer {
         void analyze();
         const std::vector<std::string>& getOrder() const;
         std::string getFullDefinition(const std::string& fnName);
+        size_t getDefinedCount();
 };

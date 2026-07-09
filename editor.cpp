@@ -82,6 +82,7 @@ void Editor::addAllFunctions() {
     }
     std::string mainDefinition = structurer.getFullDefinition("main");
     addFunctionToFile(mainDefinition);
+    definedCount = structurer.getDefinedCount();
 }
 
 void Editor::writeHeadToFile() {
@@ -98,6 +99,10 @@ void Editor::edit() {
     setFileCode();
     writeHeadToFile();
     addAllFunctions();
+    if (definedCount != rightOrder.size()) {
+        std::cerr << "Added functions do not match initial quantity\n";
+        return;
+    }
     renameFile();
 }
 

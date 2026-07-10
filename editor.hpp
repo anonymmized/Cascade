@@ -11,12 +11,13 @@ class Editor {
         std::vector<std::string> rightOrder;
         size_t definedCount;
 
+        std::vector<std::string> sortFileHead(const std::string& fileHead);
         void createNewFileName();
         void writeToFile(const std::string& strToWrite);
         void addFunctionToFile(const std::string& functionBody);
-        std::string getFileHead();
         void addAllFunctions();
         void setFileCode();
+        std::string getFileHead();
         void writeHeadToFile();
         void renameFile();
     public:

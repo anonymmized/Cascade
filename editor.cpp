@@ -115,8 +115,10 @@ void Editor::renameFile() {
     }
 }
 
+/*
 int main() {
     Editor editor;
     editor.setOldFileName("./editor.cpp");
     editor.edit();
 }
+*/

@@ -66,7 +66,7 @@ void Editor::addFunctionToFile(const std::string& functionBody) {
         return;
     }
 
-    fileToWrite << functionBody<< '\n';
+    fileToWrite << functionBody<< "\n\n";
 }
 
 void Editor::addAllFunctions() {
@@ -87,7 +87,23 @@ void Editor::addAllFunctions() {
 
 void Editor::writeHeadToFile() {
     std::string fileHead = getFileHead();
-    writeToFile(fileHead);
+    std::vector<std::string> sortedHead = sortFileHead(fileHead);
+    std::string result;
+    for (auto& str : sortedHead) {
+        result += str + '\n';
+    }
+    writeToFile(result);
+}
+
+std::vector<std::string> Editor::sortFileHead(const std::string& fileHead) {
+    std::vector<std::string> finalVector;
+    std::istringstream stream(fileHead);
+    std::string line;
+    while (std::getline(stream, line)) {
+        finalVector.push_back(line);
+    }
+    std::sort(begin(finalVector), end(finalVector));
+    return finalVector;
 }
 
 void Editor::edit() {
@@ -115,10 +131,9 @@ void Editor::renameFile() {
     }
 }
 
-/*
 int main() {
     Editor editor;
-    editor.setOldFileName("./editor.cpp");
+    editor.setOldFileName("./testCode.cpp");
     editor.edit();
 }
-*/
+

@@ -80,8 +80,10 @@ void Editor::addAllFunctions() {
             addFunctionToFile(fnDefinition);
         }
     }
-    std::string mainDefinition = structurer.getFullDefinition("main");
-    addFunctionToFile(mainDefinition);
+    if (std::find(rightOrder.begin(), rightOrder.end(), "main") != rightOrder.end()) {
+        std::string mainDefinition = structurer.getFullDefinition("main");
+        addFunctionToFile(mainDefinition);
+    }
     definedCount = structurer.getDefinedCount();
 }
 

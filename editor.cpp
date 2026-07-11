@@ -125,6 +125,19 @@ void Editor::edit(bool inPlace) {
     }
     createNewFileName();
     setFileCode();
+    if (checkForHeader()) {
+        std::cout << "Found a header file. Continue process\n";
+    } else {
+        char warn;
+        std::cout <<
+            "WARNING: no self-header include found — reordering free functions may break compilation.\n"
+            "The header may exist under a different name; include it before reordering.\nContinue program? [y/N] ";
+        std::cin >> warn;
+        if (warn != 'Y' && warn != 'y') {
+            std::cout << "Exiting...\n";
+            return;
+        }
+    }
     writeHeadToFile();
     addAllFunctions();
     if (definedCount != rightOrder.size()) {
@@ -136,6 +149,29 @@ void Editor::edit(bool inPlace) {
             renameFile();
         }
     }
+}
+
+std::string Editor::getFileName(const std::string& fileToGet) {
+    size_t rightSlash = fileToGet.rfind('/');
+    size_t dotPos = fileToGet.rfind('.');
+    return fileToGet.substr(rightSlash + 1, dotPos - rightSlash - 1);
+}
+
+bool Editor::checkForHeader() {
+    std::istringstream stream(fileCode);
+    std::string line;
+    while (std::getline(stream, line)) {
+        if (std::count(line.begin(), line.end(), '"') == 2) {
+            size_t dotPos = line.rfind('.');
+            size_t leftBlock = line.find('"');
+            std::string headerName = line.substr(leftBlock + 1, dotPos - leftBlock - 1);
+
+            if (headerName == getFileName(oldFileName)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void Editor::renameFile() {
@@ -158,7 +194,6 @@ int Editor::warnUser() {
         "Continue and overwrite the original? [y/N]: ";
     std::cin >> warn;
     if (warn == 'y' || warn == 'Y') {
-        std::cout << "Continue program...\n";
         return 0;
     }
     std::cout << "Exiting...\n";

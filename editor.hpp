@@ -21,6 +21,8 @@ class Editor {
         void writeHeadToFile();
         void renameFile();
         int warnUser();
+        bool checkForHeader();
+        std::string getFileName(const std::string& fileToGet);
     public:
         Editor(const std::string& fileName) : oldFileName(fileName) {}
         Editor() = default;

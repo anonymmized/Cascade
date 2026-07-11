@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" width="760" height="300" role="img" aria-label="Cascade terminal demo">
+  <defs>
+    <linearGradient id="win" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0f1428"/>
+      <stop offset="1" stop-color="#0a0f1f"/>
+    </linearGradient>
+    <style>
+      .mono { font: 15px 'SFMono-Regular','Consolas',monospace; }
+      .cmd  { fill: #e6edf7; }
+      .path { fill: #22d3ee; }
+      .ok   { fill: #4ade80; }
+      .warn { fill: #fbbf24; }
+      .dim  { fill: #6b7ba6; }
+      /* reveal lines one after another */
+      .ln { opacity: 0; }
+      @keyframes show { to { opacity: 1 } }
+      .l1 { animation: show .01s linear .3s forwards }
+      .l2 { animation: show .01s linear 1.1s forwards }
+      .l3 { animation: show .01s linear 1.7s forwards }
+      .l4 { animation: show .01s linear 2.3s forwards }
+      .l5 { animation: show .01s linear 3.0s forwards }
+      @keyframes blink { 50% { opacity: 0 } }
+      .cur { animation: blink 1s steps(1) infinite; animation-delay: 3.4s; }
+    </style>
+  </defs>
+
+  <rect x="8" y="8" width="744" height="284" rx="12" fill="url(#win)" stroke="#233056" stroke-width="1.5"/>
+  <rect x="8" y="8" width="744" height="40" rx="12" fill="#111931"/>
+  <rect x="8" y="36" width="744" height="12" fill="#111931"/>
+  <circle cx="34" cy="28" r="6" fill="#ff5f57"/>
+  <circle cx="56" cy="28" r="6" fill="#febc2e"/>
+  <circle cx="78" cy="28" r="6" fill="#28c840"/>
+  <text x="380" y="33" text-anchor="middle" class="mono dim">cascade — zsh</text>
+
+  <g class="mono" transform="translate(30 84)">
+    <text class="l1"><tspan class="ok">❯</tspan><tspan class="cmd" dx="10">cascade </tspan><tspan class="path">src/parser.cpp</tspan></text>
+    <text y="34" class="ln l2"><tspan class="dim">Found a header file. Continue process</tspan></text>
+    <text y="62" class="ln l3"><tspan class="warn">▲ no self-header</tspan><tspan class="dim" dx="6">check skipped — includes sorted</tspan></text>
+    <text y="90" class="ln l4"><tspan class="ok">✓</tspan><tspan class="cmd" dx="8">wrote </tspan><tspan class="path">src/parser_new.cpp</tspan><tspan class="dim" dx="8">— original untouched</tspan></text>
+    <text y="128" class="ln l5"><tspan class="ok">❯</tspan><tspan class="cur cmd" dx="10">█</tspan></text>
+  </g>
+</svg>

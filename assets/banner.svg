@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" width="1000" height="300" role="img" aria-label="Cascade — reorder C++ functions in call order">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#05070f"/>
+      <stop offset="0.55" stop-color="#0a1024"/>
+      <stop offset="1" stop-color="#0d0820"/>
+    </linearGradient>
+
+    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="0.5" stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#e879f9"/>
+      <animateTransform attributeName="gradientTransform" type="translate"
+        values="-0.6 0; 0.6 0; -0.6 0" dur="6s" repeatCount="indefinite"/>
+    </linearGradient>
+
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#818cf8" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#e879f9" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3.5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <style>
+      @keyframes drift { to { transform: translateX(60px); } }
+      @keyframes fall {
+        0%   { opacity: 0; transform: translateX(-30px); }
+        20%  { opacity: 1; transform: translateX(0); }
+        80%  { opacity: 1; transform: translateX(0); }
+        100% { opacity: 0.15; transform: translateX(0); }
+      }
+      @keyframes pulse { 0%,100% { opacity: .3 } 50% { opacity: .85 } }
+      .grid { animation: drift 8s linear infinite; }
+      .b { transform-box: fill-box; }
+      .b1 { animation: fall 4s ease-in-out infinite;      }
+      .b2 { animation: fall 4s ease-in-out infinite .4s;  }
+      .b3 { animation: fall 4s ease-in-out infinite .8s;  }
+      .b4 { animation: fall 4s ease-in-out infinite 1.2s; }
+      .b5 { animation: fall 4s ease-in-out infinite 1.6s; }
+      .dot { animation: pulse 2.4s ease-in-out infinite; }
+      .title { font: 800 68px 'Segoe UI', system-ui, sans-serif; letter-spacing: 10px; }
+      .sub   { font: 500 19px 'Segoe UI', system-ui, sans-serif; letter-spacing: 2px; }
+      .tag   { font: 600 12px 'Consolas', monospace; letter-spacing: 3px; }
+    </style>
+  </defs>
+
+  <rect width="1000" height="300" fill="url(#bg)"/>
+
+  <!-- drifting grid -->
+  <g class="grid" opacity="0.09" stroke="#4f6bff" stroke-width="1">
+    <path d="M-60 60 H1060 M-60 120 H1060 M-60 180 H1060 M-60 240 H1060"/>
+    <path d="M40 0 V300 M120 0 V300 M200 0 V300 M280 0 V300 M360 0 V300 M440 0 V300
+             M520 0 V300 M600 0 V300 M680 0 V300 M760 0 V300 M840 0 V300 M920 0 V300"/>
+  </g>
+
+  <!-- cascading step-down bars (the "reorder" motif), centered behind the wordmark -->
+  <g opacity="0.9">
+    <rect class="b b1" x="330" y="66"  width="340" height="6" rx="3" fill="url(#bar)"/>
+    <rect class="b b2" x="360" y="86"  width="280" height="6" rx="3" fill="url(#bar)"/>
+    <rect class="b b3" x="390" y="106" width="220" height="6" rx="3" fill="url(#bar)"/>
+  </g>
+
+  <!-- wordmark, centered -->
+  <g filter="url(#glow)">
+    <text class="title" x="500" y="180" text-anchor="middle" fill="url(#neon)">CASCADE</text>
+  </g>
+  <text class="sub" x="500" y="220" text-anchor="middle" fill="#9fb2d8">reorder C++ functions in call order</text>
+
+  <g transform="translate(0 250)">
+    <text class="tag" x="500" y="0" text-anchor="middle" fill="#6b83bf">STEPDOWN &#183; SORTED INCLUDES &#183; NON-DESTRUCTIVE</text>
+  </g>
+
+  <!-- frame accent -->
+  <rect x="1" y="1" width="998" height="298" fill="none" stroke="url(#neon)" stroke-opacity="0.25" stroke-width="2"/>
+</svg>

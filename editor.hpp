@@ -20,9 +20,10 @@ class Editor {
         std::string getFileHead();
         void writeHeadToFile();
         void renameFile();
+        int warnUser();
     public:
         Editor(const std::string& fileName) : oldFileName(fileName) {}
         Editor() = default;
         void setOldFileName(const std::string& fileName);
-        void edit();
+        void edit(bool inPlace);
 };

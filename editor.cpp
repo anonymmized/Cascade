@@ -96,17 +96,27 @@ void Editor::writeHeadToFile() {
 }
 
 std::vector<std::string> Editor::sortFileHead(const std::string& fileHead) {
-    std::vector<std::string> finalVector;
+    std::vector<std::string> includes;
+    std::vector<std::string> others;
     std::istringstream stream(fileHead);
     std::string line;
     while (std::getline(stream, line)) {
-        finalVector.push_back(line);
+        std::string trimmed = line;
+        trimmed.erase(0, trimmed.find_first_not_of(" \t"));
+        if (trimmed.rfind("#include", 0) == 0) {
+            includes.push_back(line);
+        } else if (!trimmed.empty()) {
+            others.push_back(line);
+        }
     }
-    std::sort(begin(finalVector), end(finalVector));
+    std::sort(begin(includes), end(includes));
+
+    std::vector<std::string> finalVector = others;
+    finalVector.insert(finalVector.end(), includes.begin(), includes.end());
     return finalVector;
 }
 
-void Editor::edit() {
+void Editor::edit(bool inPlace) {
     if (oldFileName.empty()) {
         std::cerr << "The filename was not set\n";
         return;
@@ -119,7 +129,11 @@ void Editor::edit() {
         std::cerr << "Added functions do not match initial quantity\n";
         return;
     }
-    renameFile();
+    if (inPlace) {
+        if (warnUser() == 0) {
+            renameFile();
+        }
+    }
 }
 
 void Editor::renameFile() {
@@ -131,9 +145,20 @@ void Editor::renameFile() {
     }
 }
 
-int main() {
-    Editor editor;
-    editor.setOldFileName("./testCode.cpp");
-    editor.edit();
+int Editor::warnUser() {
+    char warn;
+    std::cout << "WARNING: --in-place will OVERWRITE the original file:\n" << oldFileName << "\n\n" <<
+        "Cascade reorders functions and may produce an order that does not\n"
+        "compile (e.g. free functions in a headerless file). In --in-place\n"
+        "mode the original is replaced, so a bad reorder cannot be undone.\n\n"
+        "Recommended: run without --in-place first and review <name>_new.<ext>.\n"
+        "No backup is made.\n"
+        "Continue and overwrite the original? [y/N]: ";
+    std::cin >> warn;
+    if (warn == 'y' || warn == 'Y') {
+        std::cout << "Continue program...\n";
+        return 0;
+    }
+    std::cout << "Exiting...\n";
+    return 1;
 }
-

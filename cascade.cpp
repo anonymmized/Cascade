@@ -1,10 +1,10 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
-/*
+
 #include "editor.hpp"
-#include "structurer.hpp"
-*/
+// #include "structurer.hpp"
+
 
 struct Options {
     std::string fileName = "";
@@ -62,17 +62,19 @@ void printHelp() {
 int main(int argc, char **argv) {
     Options foundOpts = parseArgs(argc, argv);
     if (!foundOpts.errorOutput.empty()) {
-        std::cout << foundOpts.errorOutput() << '\n';
+        std::cout << foundOpts.errorOutput << '\n';
         return 1;
     }
     if (foundOpts.help) {
         printHelp();
         return 0;
     }
-    if (!foundOpts.fileName.empty()) {
-        std::cout << "File name: " << foundOpts.fileName << '\n';
+    if (foundOpts.fileName.empty()) {
+        std::cout << "There is no file to work with. Plese select target file\n";
+        return 1;
     }
-    std::cout << "In place: " << std::to_string(foundOpts.inPlace) << '\n';
-    std::cout << "Help: " << std::to_string(foundOpts.help) << '\n';
+    Editor editor;
+    editor.setOldFileName(foundOpts.fileName);
+    editor.edit(foundOpts.inPlace);
     return 0;
 }

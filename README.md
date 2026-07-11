@@ -100,10 +100,20 @@ int doSum(int a, int b) {
 ## ◈ Build
 
 ```sh
-g++ -std=c++17 cascade.cpp editor.cpp structurer.cpp -o cascade
+cmake -B build
+cmake --build build
+# binary at ./build/cascade
 ```
 
-Requires a C++17 compiler (`<regex>`, `<filesystem>`). No external dependencies.
+<details>
+<summary>or a one-line compile without CMake</summary>
+
+```sh
+g++ -std=c++17 cascade.cpp editor.cpp structurer.cpp -o cascade
+```
+</details>
+
+Requires CMake ≥ 3.15 and a C++17 compiler (`<regex>`, `<filesystem>`). No external dependencies.
 
 ---
 

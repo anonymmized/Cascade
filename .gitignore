@@ -1,0 +1,7 @@
+# build output
+/build/
+cascade
+
+# Cascade's own output files
+*_new.cpp
+*_new.hpp

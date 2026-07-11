@@ -162,11 +162,11 @@ bool Editor::checkForHeader() {
     std::string line;
     while (std::getline(stream, line)) {
         if (std::count(line.begin(), line.end(), '"') == 2) {
-            size_t dotPos = line.rfind('.');
-            size_t leftBlock = line.find('"');
-            std::string headerName = line.substr(leftBlock + 1, dotPos - leftBlock - 1);
+            size_t leftQuote = line.find('"');
+            size_t rightQuote = line.rfind('"');
+            std::string includePath = line.substr(leftQuote + 1, rightQuote - leftQuote - 1);
 
-            if (headerName == getFileName(oldFileName)) {
+            if (getFileName(includePath) == getFileName(oldFileName)) {
                 return true;
             }
         }

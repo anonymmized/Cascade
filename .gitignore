@@ -1,7 +1,30 @@
-# build output
+# --- Build output ---
 /build/
 cascade
 
-# Cascade's own output files
+# CMake artifacts (in case of an in-source build)
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# Compiled objects / binaries
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.exe
+
+# --- Cascade's own output files ---
 *_new.cpp
 *_new.hpp
+
+# --- OS / editor junk ---
+.DS_Store
+*.swp
+.idea/
+.vscode/
